@@ -42,4 +42,4 @@ Conforme se vayan realizando las auditorías se irá generando una traza de como
 
 #### Versión con interfaz de usuario
 
-Se ha creado una versión de este script en [Google Colab](https://colab.research.google.com/) para que funcione a modo de interfaz de usuario. El cuaderno es público y accesible desde este [enlace]().
+Se ha creado una versión de este script en [Google Colab](https://colab.research.google.com/) para que funcione a modo de interfaz de usuario. El cuaderno es público y accesible desde este [enlace](https://colab.research.google.com/github/javier-fraga-garcia/pagespeed-auditor/blob/main/notebooks/PageSpeed_Auditor.ipynb).
