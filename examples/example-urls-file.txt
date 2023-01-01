@@ -1,0 +1,6 @@
+https://www.example.com/
+https://www.example.com/login
+https://www.example.com/register
+https://www.example.com/blog
+https://www.example.com/blog/article1
+https://www.example.com/blog/article2
