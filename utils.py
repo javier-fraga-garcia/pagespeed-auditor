@@ -2,24 +2,20 @@ import concurrent.futures as fs
 import requests
 import re
 import csv
-import logging
-logging.basicConfig(level=logging.INFO)
-
-logger = logging.getLogger(__name__)
 
 def get_urls(urls_file, domain):
   try:
     with open(urls_file, 'r') as f:
       return {url.strip() for url in f.read().split('\n') if len(url) > 0 and url.startswith(domain)}
   except:
-    logger.error(f'[!] File {urls_file} could not be opened')
+    print(f'[!] File {urls_file} could not be opened')
 
 def get_api_key(api_key_file):
   try:
     with open(api_key_file, 'r') as f:
       return f.read().strip()
   except:
-    logger.error(f'[!] File {api_key_file} could not be opened')
+    print(f'[!] File {api_key_file} could not be opened')
 
 def parse_audit(audit):
   return {
@@ -43,30 +39,30 @@ def make_audit(url, api_key, strategy):
       'strategy': strategy
   }
   try:
-    logger.info(f'[+] Auditing {url} with strategy {strategy}')
+    print(f'[+] Auditing {url} with strategy {strategy}')
     response = requests.get(ENDPOINT.format(url, api_key), params)
     if response.status_code == 200:
       audit = response.json()['lighthouseResult']
       return parse_audit(audit)
   except:
-    logger.info(f'[!] Something went wrong with {url}')
+    print(f'[!] Something went wrong with {url}')
 
 def make_audits(urls, api_key, strategy):
-  logger.info(f'[+] Auditing {len(urls)} unique URLs\n')
+  print(f'[+] Auditing {len(urls)} unique URLs\n')
   audits = list()
   for i, url in enumerate(urls):
     audit = make_audit(url, api_key, strategy)
     audits.append(audit)
     if (i+1) % 25 == 0:
-      logger.info(f'\n[-] Completed {i+1} audits\n')
-  return audits
+      print(f'\n[-] Completed {i+1} audits\n')
+  return [audit for audit in audits if audit is not None]
 
 def make_concurrent_audits(urls, api_key, strategy, max_workers=5):
-  logger.info(f'[+] Auditing {len(urls)} unique URLs\n')
+  print(f'[+] Auditing {len(urls)} unique URLs\n')
   with fs.ThreadPoolExecutor(max_workers=max_workers) as exec:
     futures = [exec.submit(make_audit, url, api_key, strategy) for url in urls]
     audits = [future.result() for future in fs.as_completed(futures)]
-  return audits
+  return [audit for audit in audits if audit is not None]
 
 def write_results(audits, file_name):
   try:
@@ -78,6 +74,6 @@ def write_results(audits, file_name):
       for audit in audits:
         res = [audit.get(key, None) for key in headers]
         writer.writerow(res)
-      logger.info(f'[+] Written file in {file_name}.csv\n')
+      print(f'[+] Written file in {file_name}.csv\n')
   except:
-    logger.error(f'Something went wrong when writing the file {file_name}')
+    print(f'Something went wrong when writing the file {file_name}')
