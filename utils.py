@@ -57,7 +57,7 @@ def make_audits(urls, api_key, strategy):
       print(f'\n[-] Completed {i+1} audits\n')
   return [audit for audit in audits if audit is not None]
 
-def make_concurrent_audits(urls, api_key, strategy, max_workers=5):
+def make_parallel_audits(urls, api_key, strategy, max_workers=5):
   print(f'[+] Auditing {len(urls)} unique URLs\n')
   with fs.ThreadPoolExecutor(max_workers=max_workers) as exec:
     futures = [exec.submit(make_audit, url, api_key, strategy) for url in urls]

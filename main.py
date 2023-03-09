@@ -1,6 +1,6 @@
 import argparse
 import time
-from utils import get_urls, get_api_key, make_audits, make_concurrent_audits, write_results
+from utils import get_urls, get_api_key, make_audits, make_parallel_audits, write_results
 
 
 def get_time(callback=None):
@@ -18,7 +18,7 @@ def main():
     parser.add_argument('-s', '--strategy', type=str, choices=['desktop', 'mobile'], help='the device on which to perform the WebVitals audit')
     parser.add_argument('-d', '--domain', type=str, help='the domain under which the audit is to be performed')
     parser.add_argument('-r', '--result', type=str, help='the name of the results file')
-    parser.add_argument('-c', '--concurrent', default=False, action='store_true', help='(optional) if you wish to perform multithreaded audits')
+    parser.add_argument('-p', '--parallel', default=False, action='store_true', help='(optional) if you wish to perform multithreaded audits')
 
     args = parser.parse_args()
     urls = args.urls
@@ -26,17 +26,17 @@ def main():
     strategy = args.strategy
     domain = args.domain
     result = args.result
-    concurrent = args.concurrent
+    parallel = args.parallel
 
     urls = get_urls(urls, domain)
     api_key = get_api_key(key)
 
     if urls and api_key:
-        if not concurrent:
+        if not parallel:
             audits = make_audits(urls, api_key, strategy)
             write_results(audits, result)
         else:
-            audits = make_concurrent_audits(urls, api_key, strategy)
+            audits = make_parallel_audits(urls, api_key, strategy)
             write_results(audits, result)
 
 
