@@ -1,4 +1,5 @@
 import concurrent.futures as fs
+from tqdm.auto import tqdm
 import requests
 import re
 import csv
@@ -33,13 +34,14 @@ def parse_audit(audit):
       'seo': audit['categories']['seo']['score'] if audit['categories']['seo']['score'] else None
   }
 
-def make_audit(url, api_key, strategy):
+def make_audit(url, api_key, strategy, verbose=False):
   ENDPOINT = 'https://www.googleapis.com/pagespeedonline/v5/runPagespeed?url={}&category=best-practices&category=performance&category=seo&category=accessibility&key={}'
   params = {
       'strategy': strategy
   }
   try:
-    print(f'[+] Auditing {url} with strategy {strategy}')
+    if verbose:
+      print(f'[+] Auditing {url} with strategy {strategy}')
     response = requests.get(ENDPOINT.format(url, api_key), params)
     if response.status_code == 200:
       audit = response.json()['lighthouseResult']
@@ -49,12 +51,7 @@ def make_audit(url, api_key, strategy):
 
 def make_audits(urls, api_key, strategy):
   print(f'[+] Auditing {len(urls)} unique URLs\n')
-  audits = list()
-  for i, url in enumerate(urls):
-    audit = make_audit(url, api_key, strategy)
-    audits.append(audit)
-    if (i+1) % 25 == 0:
-      print(f'\n[-] Completed {i+1} audits\n')
+  audits = [make_audit(url, api_key, strategy) for url in tqdm(urls, position=0, leave=True)]
   return [audit for audit in audits if audit is not None]
 
 def make_parallel_audits(urls, api_key, strategy, max_workers=5):
@@ -76,4 +73,4 @@ def write_results(audits, file_name):
         writer.writerow(res)
       print(f'[+] Written file in {file_name}.csv\n')
   except:
-    print(f'Something went wrong when writing the file {file_name}')
+    print(f'[!] Something went wrong when writing the file {file_name}')
