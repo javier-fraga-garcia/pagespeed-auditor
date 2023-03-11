@@ -49,15 +49,15 @@ def make_audit(url, api_key, strategy, verbose=False):
   except:
     print(f'[!] Something went wrong with {url}')
 
-def make_audits(urls, api_key, strategy):
+def make_audits(urls, api_key, strategy, verbose=False):
   print(f'[+] Auditing {len(urls)} unique URLs\n')
-  audits = [make_audit(url, api_key, strategy) for url in tqdm(urls, position=0, leave=True)]
+  audits = [make_audit(url, api_key, strategy, verbose) for url in tqdm(urls, position=0, leave=True)]
   return [audit for audit in audits if audit is not None]
 
-def make_parallel_audits(urls, api_key, strategy, max_workers=5):
+def make_parallel_audits(urls, api_key, strategy, max_workers=5, verbose=False):
   print(f'[+] Auditing {len(urls)} unique URLs\n')
   with fs.ThreadPoolExecutor(max_workers=max_workers) as exec:
-    futures = [exec.submit(make_audit, url, api_key, strategy) for url in urls]
+    futures = [exec.submit(make_audit, url, api_key, strategy, verbose) for url in urls]
     audits = [future.result() for future in fs.as_completed(futures)]
   return [audit for audit in audits if audit is not None]
 

@@ -22,7 +22,7 @@ Para ejecutar el script es necesario utilizar el comando `py main.py` seguido de
 * `-s`, `--strategy`: *(obligatorio)* el dispositivo en el que se desea realizar la auditoría. Opciones posibles &rarr; (desktop, mobile).
 * `-d`, `--domain`: *(obligatorio)* el dominio bajo el cual se quiere realizar la auditoría. Ejemplo: `https://www.example.com`
 * `-r`, `--result`: *(obligatorio)* el nombre del archivo en el que se almacenarán los resultados. El nombre debe ir sin extensión. Ejemplo: `audit-res-mobile`, también se puede indicar una ruta en caso de que se quiera que el script almacene el archivo en una carpeta determinada `C:\Users\user\desktop\data\audit-res-mobile`
-* `-c`, `--concurrent`: *(opcional)* si se desea que las auditorías se realicen en varios hilos. Se recomienda en casos en que haya muchas URLs para auditar y el proceso se alargue demasiado. Por defecto está en `False`.
+* `-p`, `--parallel`: *(opcional)* si se desea que las auditorías se realicen en varios hilos. Se recomienda en casos en que haya muchas URLs para auditar y el proceso se alargue demasiado. Por defecto está en `False`.
 * `-h`, `--help`: da acceso a un menú de ayuda con toda esta información.
 
 Comandos de ejemplo:
