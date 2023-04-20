@@ -16,7 +16,6 @@ def main():
     parser.add_argument('-u', '--urls', type=str, help='the path to the file containing the URLs to be audited')
     parser.add_argument('-k', '--key', type=str, help='the path to the file containing the PageSpeed API key')
     parser.add_argument('-s', '--strategy', type=str, choices=['desktop', 'mobile'], help='the device on which to perform the WebVitals audit')
-    parser.add_argument('-d', '--domain', type=str, help='the domain under which the audit is to be performed')
     parser.add_argument('-r', '--result', type=str, help='the name of the results file')
     parser.add_argument('-p', '--parallel', default=False, action='store_true', help='(optional) if you wish to perform multithreaded audits')
 
@@ -24,11 +23,10 @@ def main():
     urls = args.urls
     key = args.key
     strategy = args.strategy
-    domain = args.domain
     result = args.result
     parallel = args.parallel
 
-    urls = get_urls(urls, domain)
+    urls = get_urls(urls)
     api_key = get_api_key(key)
 
     if urls and api_key:
@@ -36,7 +34,7 @@ def main():
             audits = make_audits(urls, api_key, strategy)
             write_results(audits, result)
         else:
-            audits = make_parallel_audits(urls, api_key, strategy)
+            audits = make_parallel_audits(urls, api_key, strategy, 10)
             write_results(audits, result)
 
 

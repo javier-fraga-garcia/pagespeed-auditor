@@ -4,7 +4,7 @@ import requests
 import re
 import csv
 
-def get_urls(urls_file, domain):
+def get_urls(urls_file, domain='https://'):
   try:
     with open(urls_file, 'r') as f:
       return {url.strip() for url in f.read().split('\n') if len(url) > 0 and url.startswith(domain)}
@@ -20,18 +20,18 @@ def get_api_key(api_key_file):
 
 def parse_audit(audit):
   return {
-      'final_url': audit['finalUrl'],
-      'device': audit['configSettings']['emulatedFormFactor'],
-      'first_contentful_paint': float(re.sub('[a-zA-Z_,]', '', audit['audits']['first-contentful-paint']['displayValue']).strip()) if audit['audits']['first-contentful-paint']['displayValue'] else None,
-      'time_to_interactive': float(re.sub('[a-zA-Z_,]', '', audit['audits']['first-contentful-paint']['displayValue']).strip()) if audit['audits']['first-contentful-paint']['displayValue'] else None,
-      'largest_contentful_paint': float(re.sub('[a-zA-Z_,]', '', audit['audits']['interactive']['displayValue']).strip()) if audit['audits']['interactive']['displayValue'] else None,
-      'speed_index': float(re.sub('[a-zA-Z_,]', '', audit['audits']['speed-index']['displayValue']).strip()) if audit['audits']['speed-index']['displayValue'] else None,
-      'total_blocking_time': float(re.sub('[a-zA-Z_,]', '', audit['audits']['total-blocking-time']['displayValue']).strip()) if audit['audits']['total-blocking-time']['displayValue'] else None,
-      'dom_size': int(re.sub('[a-zA-Z_,]', '', audit['audits']['dom-size']['displayValue']).strip()) if audit['audits']['dom-size']['displayValue'] else None,
-      'performance': audit['categories']['performance']['score'] if audit['categories']['performance']['score'] else None,
-      'accessibility': audit['categories']['accessibility']['score'] if audit['categories']['accessibility']['score'] else None,
-      'best_practices': audit['categories']['best-practices']['score'] if audit['categories']['best-practices']['score'] else None,
-      'seo': audit['categories']['seo']['score'] if audit['categories']['seo']['score'] else None
+      'final_url': audit['lighthouseResult']['finalUrl'],
+      'device': audit['lighthouseResult']['configSettings']['emulatedFormFactor'],
+      'first_contentful_paint': float(re.sub('[a-zA-Z_,]', '', audit['lighthouseResult']['audits']['first-contentful-paint']['displayValue']).strip()) if audit['lighthouseResult']['audits']['first-contentful-paint']['displayValue'] else None,
+      'time_to_interactive': float(re.sub('[a-zA-Z_,]', '', audit['lighthouseResult']['audits']['interactive']['displayValue']).strip()) if audit['lighthouseResult']['audits']['interactive']['displayValue'] else None,
+      'largest_contentful_paint': float(re.sub('[a-zA-Z_,]', '', audit['lighthouseResult']['audits']['largest-contentful-paint']['displayValue']).strip()) if audit['lighthouseResult']['audits']['largest-contentful-paint']['displayValue'] else None,
+      'speed_index': float(re.sub('[a-zA-Z_,]', '', audit['lighthouseResult']['audits']['speed-index']['displayValue']).strip()) if audit['lighthouseResult']['audits']['speed-index']['displayValue'] else None,
+      'total_blocking_time': float(re.sub('[a-zA-Z_,]', '', audit['lighthouseResult']['audits']['total-blocking-time']['displayValue']).strip()) if audit['lighthouseResult']['audits']['total-blocking-time']['displayValue'] else None,
+      'dom_size': int(re.sub('[a-zA-Z_,]', '', audit['lighthouseResult']['audits']['dom-size']['displayValue']).strip()) if audit['lighthouseResult']['audits']['dom-size']['displayValue'] else None,
+      'performance': audit['lighthouseResult']['categories']['performance']['score'] if audit['lighthouseResult']['categories']['performance']['score'] else None,
+      'accessibility': audit['lighthouseResult']['categories']['accessibility']['score'] if audit['lighthouseResult']['categories']['accessibility']['score'] else None,
+      'best_practices': audit['lighthouseResult']['categories']['best-practices']['score'] if audit['lighthouseResult']['categories']['best-practices']['score'] else None,
+      'seo': audit['lighthouseResult']['categories']['seo']['score'] if audit['lighthouseResult']['categories']['seo']['score'] else None
   }
 
 def make_audit(url, api_key, strategy, verbose=False):
@@ -44,7 +44,7 @@ def make_audit(url, api_key, strategy, verbose=False):
       print(f'[+] Auditing {url} with strategy {strategy}')
     response = requests.get(ENDPOINT.format(url, api_key), params)
     if response.status_code == 200:
-      audit = response.json()['lighthouseResult']
+      audit = response.json()
       return parse_audit(audit)
   except:
     print(f'[!] Something went wrong with {url}')

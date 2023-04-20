@@ -20,7 +20,6 @@ Para ejecutar el script es necesario utilizar el comando `py main.py` seguido de
 * `-u`, `--url`: *(obligatorio)* la ruta al archivo que contiene las URLs que se desea auditar. Ejemplo: `C:\Users\user\Desktop\urls-to-audit.txt`
 * `-k`, `--key`: *(obligatorio)* la ruta al archivo que contiene la clave API de PageSpeed. Ejemplo: `C:\Users\user\Desktop\api-key.txt`.
 * `-s`, `--strategy`: *(obligatorio)* el dispositivo en el que se desea realizar la auditoría. Opciones posibles &rarr; (desktop, mobile).
-* `-d`, `--domain`: *(obligatorio)* el dominio bajo el cual se quiere realizar la auditoría. Ejemplo: `https://www.example.com`
 * `-r`, `--result`: *(obligatorio)* el nombre del archivo en el que se almacenarán los resultados. El nombre debe ir sin extensión. Ejemplo: `audit-res-mobile`, también se puede indicar una ruta en caso de que se quiera que el script almacene el archivo en una carpeta determinada `C:\Users\user\desktop\data\audit-res-mobile`
 * `-p`, `--parallel`: *(opcional)* si se desea que las auditorías se realicen en varios hilos. Se recomienda en casos en que haya muchas URLs para auditar y el proceso se alargue demasiado. Por defecto está en `False`.
 * `-h`, `--help`: da acceso a un menú de ayuda con toda esta información.
@@ -38,6 +37,8 @@ En caso de querer una ejecución multihilo para el caso anterior simplemente se 
 Conforme se vayan realizando las auditorías se irá generando una traza de como va el proceso. Una vez finalizado se generará un archivo *.csv* con los resultados. Las información sobre qué significa cada métrica y cómo interpretar los resultados se puede consultar en las siguientes páginas.
 
 * [Documentación de PageSpeed Insights](https://developers.google.com/speed/docs/insights/v5/about)
+* [Get Started PageSpeed API](https://developers.google.com/speed/docs/insights/v5/get-started?hl=es-419)
+* [Referencia de métricas de PageSpeed API](https://developers.google.com/speed/docs/insights/v5/reference/pagespeedapi/runpagespeed?hl=es-419)
 * [Documentación de Lighthouse](https://developer.chrome.com/docs/lighthouse/)
 
 #### Versión con interfaz de usuario
