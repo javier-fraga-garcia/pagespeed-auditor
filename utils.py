@@ -1,8 +1,9 @@
 import concurrent.futures as fs
-from tqdm.auto import tqdm
 import requests
 import re
 import csv
+from collections import defaultdict
+from tqdm.auto import tqdm
 
 def get_urls(urls_file, domain='https://'):
   try:
@@ -19,20 +20,31 @@ def get_api_key(api_key_file):
     print(f'[!] File {api_key_file} could not be opened')
 
 def parse_audit(audit):
-  return {
-      'final_url': audit['lighthouseResult']['finalUrl'],
-      'device': audit['lighthouseResult']['configSettings']['emulatedFormFactor'],
-      'first_contentful_paint': float(re.sub('[a-zA-Z_,]', '', audit['lighthouseResult']['audits']['first-contentful-paint']['displayValue']).strip()) if audit['lighthouseResult']['audits']['first-contentful-paint']['displayValue'] else None,
-      'time_to_interactive': float(re.sub('[a-zA-Z_,]', '', audit['lighthouseResult']['audits']['interactive']['displayValue']).strip()) if audit['lighthouseResult']['audits']['interactive']['displayValue'] else None,
-      'largest_contentful_paint': float(re.sub('[a-zA-Z_,]', '', audit['lighthouseResult']['audits']['largest-contentful-paint']['displayValue']).strip()) if audit['lighthouseResult']['audits']['largest-contentful-paint']['displayValue'] else None,
-      'speed_index': float(re.sub('[a-zA-Z_,]', '', audit['lighthouseResult']['audits']['speed-index']['displayValue']).strip()) if audit['lighthouseResult']['audits']['speed-index']['displayValue'] else None,
-      'total_blocking_time': float(re.sub('[a-zA-Z_,]', '', audit['lighthouseResult']['audits']['total-blocking-time']['displayValue']).strip()) if audit['lighthouseResult']['audits']['total-blocking-time']['displayValue'] else None,
-      'dom_size': int(re.sub('[a-zA-Z_,]', '', audit['lighthouseResult']['audits']['dom-size']['displayValue']).strip()) if audit['lighthouseResult']['audits']['dom-size']['displayValue'] else None,
-      'performance': audit['lighthouseResult']['categories']['performance']['score'] if audit['lighthouseResult']['categories']['performance']['score'] else None,
-      'accessibility': audit['lighthouseResult']['categories']['accessibility']['score'] if audit['lighthouseResult']['categories']['accessibility']['score'] else None,
-      'best_practices': audit['lighthouseResult']['categories']['best-practices']['score'] if audit['lighthouseResult']['categories']['best-practices']['score'] else None,
-      'seo': audit['lighthouseResult']['categories']['seo']['score'] if audit['lighthouseResult']['categories']['seo']['score'] else None
-  }
+    results = defaultdict(None, **{'crux_cumulative_layout_shift': None, 'crux_experimental_interaction_next_paint': None, 'crux_experimental_time_first_byte': None, 'crux_first_contentful_paint': None, 'crux_first_input_delay': None, 'crux_largest_contentful_paint': None, 'crux_overall': None})
+
+    results['final_url'] = audit['lighthouseResult']['finalUrl']
+    results['device'] = audit['lighthouseResult']['configSettings']['emulatedFormFactor']
+    results['first_contentful_paint'] = float(re.sub('[a-zA-Z_,]', '', audit['lighthouseResult']['audits']['first-contentful-paint']['displayValue']).strip()) if 'first-contentful-paint' in audit['lighthouseResult']['audits'] else None
+    results['time_to_interactive'] = float(re.sub('[a-zA-Z_,]', '', audit['lighthouseResult']['audits']['interactive']['displayValue']).strip()) if 'interactive' in audit['lighthouseResult']['audits'] else None
+    results['largest_contentful_paint'] = float(re.sub('[a-zA-Z_,]', '', audit['lighthouseResult']['audits']['largest-contentful-paint']['displayValue']).strip()) if 'largest-contentful-paint' in audit['lighthouseResult']['audits'] else None
+    results['speed_index'] = float(re.sub('[a-zA-Z_,]', '', audit['lighthouseResult']['audits']['speed-index']['displayValue']).strip()) if 'speed-index' in audit['lighthouseResult']['audits'] else None
+    results['total_blocking_time'] = float(re.sub('[a-zA-Z_,]', '', audit['lighthouseResult']['audits']['total-blocking-time']['displayValue']).strip()) if 'total-blocking-time' in audit['lighthouseResult']['audits'] else None
+    results['dom_size'] = int(re.sub('[a-zA-Z_,]', '', audit['lighthouseResult']['audits']['dom-size']['displayValue']).strip()) if 'dom-size' in audit['lighthouseResult']['audits'] else None
+    results['performance'] = audit['lighthouseResult']['categories']['performance']['score'] if 'performance' in audit['lighthouseResult']['categories'] else None
+    results['accessibility'] = audit['lighthouseResult']['categories']['accessibility']['score'] if 'accessibility' in audit['lighthouseResult']['categories'] else None
+    results['best_practices'] = audit['lighthouseResult']['categories']['best-practices']['score'] if 'best-practices' in audit['lighthouseResult']['categories'] else None
+    results['seo'] = audit['lighthouseResult']['categories']['seo']['score'] if 'seo' in audit['lighthouseResult']['categories'] else None
+
+    if 'metrics' in audit['loadingExperience']:
+      results['crux_cumulative_layout_shift'] = audit['loadingExperience']['metrics']['CUMULATIVE_LAYOUT_SHIFT_SCORE']['category'] if 'CUMULATIVE_LAYOUT_SHIFT_SCORE' in audit['loadingExperience']['metrics'] else None
+      results['crux_experimental_interaction_next_paint'] = audit['loadingExperience']['metrics']['EXPERIMENTAL_INTERACTION_TO_NEXT_PAINT']['category'] if 'EXPERIMENTAL_INTERACTION_TO_NEXT_PAINT' in audit['loadingExperience']['metrics'] else None
+      results['crux_experimental_time_first_byte'] = audit['loadingExperience']['metrics']['EXPERIMENTAL_TIME_TO_FIRST_BYTE']['category'] if 'EXPERIMENTAL_TIME_TO_FIRST_BYTE' in audit['loadingExperience']['metrics'] else None
+      results['crux_first_contentful_paint'] = audit['loadingExperience']['metrics']['FIRST_CONTENTFUL_PAINT_MS']['category'] if 'FIRST_CONTENTFUL_PAINT_MS' in audit['loadingExperience']['metrics'] else None
+      results['crux_first_input_delay'] = audit['loadingExperience']['metrics']['FIRST_INPUT_DELAY_MS']['category'] if 'FIRST_INPUT_DELAY_MS' in audit['loadingExperience']['metrics'] else None
+      results['crux_largest_contentful_paint'] = audit['loadingExperience']['metrics']['LARGEST_CONTENTFUL_PAINT_MS']['category'] if 'LARGEST_CONTENTFUL_PAINT_MS' in audit['loadingExperience']['metrics'] else None
+      results['crux_overall'] = audit['loadingExperience']['overall_category'] if 'overall_category' in audit['loadingExperience'] else None
+
+    return results
 
 def make_audit(url, api_key, strategy, verbose=False):
   ENDPOINT = 'https://www.googleapis.com/pagespeedonline/v5/runPagespeed?url={}&category=best-practices&category=performance&category=seo&category=accessibility&key={}'
